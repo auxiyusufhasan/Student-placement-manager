@@ -2,6 +2,12 @@
 
 A React, Express, and SQLite placement workspace for managing student records, placement stages, CV profiles, and company role requirements. The SQL statements are written by hand in [`backend/db.js`](./backend/db.js); no ORM or query builder is used.
 
+## DBMS PBL
+
+- **Group:** Group - 1
+- **Topic:** Student Placement Management System
+- **Group members:** Zeeshan Ahmed, Yusuf Hasan, Fatima Khatoon, Yasir Bin Israr, Ashish Kumar Singh, and Dhrub Tiwari
+
 ## Features
 
 - Student profiles with course, graduation year, placement stage, skills, and pasted CV text.
