@@ -2,5 +2,6 @@ node_modules/
 dist/
 backend/students.sqlite
 backend/students.sqlite-journal
+backend/uploads/cvs/
 .vercel/
 .DS_Store

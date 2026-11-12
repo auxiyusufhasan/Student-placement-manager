@@ -6,6 +6,7 @@
     "dev": "concurrently -k \"vite\" \"node --watch backend/server.js\"",
     "dev:client": "vite",
     "dev:server": "node --watch backend/server.js",
+    "seed:demo": "node backend/seed-demo.js",
     "start": "node backend/server.js",
     "build": "vite build"
   },

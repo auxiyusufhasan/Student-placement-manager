@@ -1,6 +1,22 @@
 # Student Placement Management System
 
-A small React, Express, and SQLite CRUD app for practicing database basics. The SQL statements are written by hand in [`backend/db.js`](./backend/db.js); no ORM or query builder is used.
+A React, Express, and SQLite placement workspace for managing student records, placement stages, CV profiles, and company role requirements. The SQL statements are written by hand in [`backend/db.js`](./backend/db.js); no ORM or query builder is used.
+
+## Features
+
+- Student profiles with course, graduation year, placement stage, skills, and pasted CV text.
+- Upload and download student CV files in PDF, DOC, or DOCX format (up to 10 MB). Replacing a CV removes the previous uploaded file.
+- Placement pipeline stages: Not Placed, Applied, Interview, Selected, and Placed.
+- Search and status filters, placement overview metrics, and CSV export.
+- Interview scheduling, an upcoming-interviews list, and per-student follow-up notes.
+- Bulk placement-stage updates and CSV import (duplicate email addresses are skipped by the API).
+- Company role profiles with required skills stored in SQLite.
+- Ranked role matching with matched skills, skills to verify, and a concise summary extracted from the supplied CV text. Matching is an exact case-insensitive skill comparison; it is a shortlist aid, not an automated hiring decision.
+- A selection email action for students marked Selected. It opens a prefilled `mailto:` draft in the user's mail app; a person reviews and sends it. No email provider or automatic email delivery is configured.
+
+Existing SQLite files are upgraded additively when the API starts. Student records now include `skills` and `cv_text`, and role requirements are stored in a `roles` table. CV text is stored in the same local SQLite database as student records.
+
+Uploaded CV files are stored under `backend/uploads/cvs` locally (ignored by Git). Set `CV_UPLOAD_DIR` to choose another durable folder. On Vercel, files use `/tmp/placement-cvs` and are ephemeral, like the SQLite database; use durable object storage before relying on uploads in production.
 
 ## Requirements
 
@@ -27,6 +43,8 @@ The API listens on <http://localhost:3001>. Vite forwards `/api` requests to it.
 
 To run only the API, use `npm run dev:server`. To build the frontend, use `npm run build`.
 
+Run `npm run seed:demo` to add sixteen clearly labeled fictional student profiles and three company role examples. The command is safe to rerun and skips demo emails and roles that are already present. The sample CV summaries and full CV text are included in `outputs/placement-demo-20261103/student-cv-placement-demo.xlsx` on the `CV Summaries`, `CV Details`, and `Role Matches` sheets.
+
 ## Database and API
 
 The database setup and readable `CREATE`, `SELECT`, `INSERT`, `UPDATE`, and `DELETE` statements are in `backend/db.js`. All values supplied by users are bound as SQL parameters.
@@ -39,7 +57,7 @@ The Express API in `backend/app.js` provides:
 - `DELETE /api/students/:id` — delete a record
 - `DELETE /api/students` — clear all records and keep the table
 
-Each record has a name, email, course, graduation year, placement status, and optional company name.
+Student records have a name, email, course, graduation year, placement status, optional company name, skills, and CV text. Role records have a company, title, required skills, and optional description.
 
 ## Deploy to Vercel
 

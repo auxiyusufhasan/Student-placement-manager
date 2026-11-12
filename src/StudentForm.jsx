@@ -7,6 +7,10 @@ const emptyForm = {
   graduation_year: "",
   placement_status: "Not Placed",
   company_name: "",
+  skills: "",
+  cv_text: "",
+  interview_date: "",
+  follow_up_notes: "",
 };
 
 const inputClass =
@@ -23,8 +27,12 @@ function Field({ label, name, children }) {
 
 export default function StudentForm({ student, saving, onSubmit, onCancel }) {
   const [form, setForm] = useState(emptyForm);
+  const [cvFile, setCvFile] = useState(null);
+  const [fileError, setFileError] = useState("");
 
   useEffect(() => {
+    setCvFile(null);
+    setFileError("");
     setForm(
       student
         ? {
@@ -34,6 +42,10 @@ export default function StudentForm({ student, saving, onSubmit, onCancel }) {
             graduation_year: String(student.graduation_year),
             placement_status: student.placement_status,
             company_name: student.company_name || "",
+            skills: student.skills || "",
+            cv_text: student.cv_text || "",
+            interview_date: student.interview_date || "",
+            follow_up_notes: student.follow_up_notes || "",
           }
         : emptyForm,
     );
@@ -50,7 +62,25 @@ export default function StudentForm({ student, saving, onSubmit, onCancel }) {
       ...form,
       graduation_year: Number(form.graduation_year),
       company_name: form.company_name.trim() || null,
+      interview_date: form.interview_date || null,
+      cv_file: cvFile,
     });
+  }
+
+  function selectCv(event) {
+    const file = event.target.files?.[0] || null;
+    event.target.value = "";
+    setFileError("");
+    if (!file) return;
+    if (!/\.(pdf|doc|docx)$/i.test(file.name)) {
+      setFileError("Choose a PDF, DOC, or DOCX file.");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setFileError("CV files must be 10 MB or smaller.");
+      return;
+    }
+    setCvFile(file);
   }
 
   return (
@@ -117,6 +147,9 @@ export default function StudentForm({ student, saving, onSubmit, onCancel }) {
             onChange={updateField}
           >
             <option>Not Placed</option>
+            <option>Applied</option>
+            <option>Interview</option>
+            <option>Selected</option>
             <option>Placed</option>
           </select>
         </Field>
@@ -130,6 +163,50 @@ export default function StudentForm({ student, saving, onSubmit, onCancel }) {
             placeholder="e.g. Acme Inc."
             maxLength={100}
           />
+        </Field>
+        <Field label="Skills (comma separated)" name="skills">
+          <input className={inputClass} id="skills" name="skills" value={form.skills} onChange={updateField}
+            placeholder="e.g. Python, SQL, React, data analysis" maxLength={4000} />
+        </Field>
+      </div>
+
+      <Field label="CV / resume text" name="cv_text">
+        <textarea className={`${inputClass} min-h-32 resize-y`} id="cv_text" name="cv_text" value={form.cv_text}
+          onChange={updateField} placeholder="Paste resume text to create a searchable summary and match it against company roles."
+          maxLength={20000} />
+      </Field>
+
+      <div>
+        <div className="text-sm font-medium text-slate-700">CV file</div>
+        <div className="mt-1.5 flex flex-col gap-3 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-lg text-blue-700 shadow-sm">↥</span>
+            <div className="min-w-0">
+              <div className="truncate text-sm font-semibold text-slate-800">{cvFile?.name || student?.cv_file_name || "Add a student CV"}</div>
+              <div className="text-xs text-slate-500">PDF, DOC, or DOCX · up to 10 MB</div>
+            </div>
+          </div>
+          <div className="flex shrink-0 items-center gap-3">
+            {student?.cv_file_name && !cvFile && <a className="text-sm font-semibold text-blue-700 hover:text-blue-900" href={`/api/students/${student.id}/cv`}>Download</a>}
+            {cvFile && <button type="button" onClick={() => setCvFile(null)} className="text-sm font-semibold text-slate-500">Remove</button>}
+            <label className="cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+              {cvFile || student?.cv_file_name ? "Replace file" : "Choose file"}
+              <input type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={selectCv} className="sr-only" />
+            </label>
+          </div>
+        </div>
+        {fileError && <p className="mt-1.5 text-xs font-medium text-rose-700" role="alert">{fileError}</p>}
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label="Interview date and time (optional)" name="interview_date">
+          <input className={inputClass} id="interview_date" name="interview_date" type="datetime-local"
+            value={form.interview_date} onChange={updateField} />
+        </Field>
+        <Field label="Follow-up notes" name="follow_up_notes">
+          <textarea className={`${inputClass} min-h-24 resize-y`} id="follow_up_notes" name="follow_up_notes"
+            value={form.follow_up_notes} onChange={updateField} maxLength={5000}
+            placeholder="Interview feedback, next steps, or recruiter follow-up" />
         </Field>
       </div>
 
